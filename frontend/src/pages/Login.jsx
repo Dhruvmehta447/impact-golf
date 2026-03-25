@@ -11,8 +11,9 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      
+// Vite uses import.meta.env to grab the variables you set in Vercel
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const { data } = await axios.post(`${API_URL}/api/auth/login`, { email, password });
       // 1. Save the token
       localStorage.setItem('token', data.token);
       

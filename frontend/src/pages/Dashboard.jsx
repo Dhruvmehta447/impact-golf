@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
+// This constant automatically switches between Production and Development URLs
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,7 +27,7 @@ export default function Dashboard() {
 
     const queryParams = new URLSearchParams(location.search);
     if (queryParams.get('payment') === 'success') {
-      axios.post('http://localhost:5000/api/payment/verify', {}, { headers: { Authorization: `Bearer ${token}` } })
+      axios.post(`${API_URL}/api/payment/verify`, {}, { headers: { Authorization: `Bearer ${token}` } })
       .then(() => {
         setPaymentMessage('🎉 Payment Successful! Your account is officially upgraded.');
         window.history.replaceState(null, '', '/dashboard'); 
@@ -33,25 +36,40 @@ export default function Dashboard() {
   }, [navigate, location]);
 
   const fetchScores = async (token) => {
-    try { const res = await axios.get('http://localhost:5000/api/scores', { headers: { Authorization: `Bearer ${token}` } }); setScores(res.data); } catch (e) { console.error(e); }
+    try { 
+      const res = await axios.get(`${API_URL}/api/scores`, { headers: { Authorization: `Bearer ${token}` } }); 
+      setScores(res.data); 
+    } catch (e) { console.error(e); }
   };
+  
   const fetchCharities = async () => {
-    try { const res = await axios.get('http://localhost:5000/api/charities'); setCharities(res.data); } catch (e) { console.error(e); }
+    try { 
+      const res = await axios.get(`${API_URL}/api/charities`); 
+      setCharities(res.data); 
+    } catch (e) { console.error(e); }
   };
 
   const handleScoreSubmit = async (e) => {
-    e.preventDefault(); const token = localStorage.getItem('token');
+    e.preventDefault(); 
+    const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/scores', { scoreValue: Number(scoreValue), datePlayed }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post(`${API_URL}/api/scores`, 
+        { scoreValue: Number(scoreValue), datePlayed }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setScoreValue(''); setDatePlayed(''); fetchScores(token); 
     } catch (error) { alert('Error: ' + error.response?.data?.message); }
   };
 
   const handleCharitySubmit = async (e) => {
-    e.preventDefault(); const token = localStorage.getItem('token');
+    e.preventDefault(); 
+    const token = localStorage.getItem('token');
     if (!selectedCharityId) return alert('Select a cause first!');
     try {
-      await axios.put('http://localhost:5000/api/charities/select', { charityId: selectedCharityId, percentage: Number(contribution) }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${API_URL}/api/charities/select`, 
+        { charityId: selectedCharityId, percentage: Number(contribution) }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setSavedMessage(`Pledge of ${contribution}% saved!`);
     } catch (error) { alert('Error: ' + error.response?.data?.message); }
   };
@@ -59,21 +77,32 @@ export default function Dashboard() {
   const handleSubscribe = async (planType) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await axios.post('http://localhost:5000/api/payment/create-checkout-session', { plan: planType }, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${API_URL}/api/payment/create-checkout-session`, 
+        { plan: planType }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       window.location.href = res.data.url; 
     } catch (error) { alert('Gateway Error'); }
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) { const reader = new FileReader(); reader.readAsDataURL(file); reader.onloadend = () => setProofImage(reader.result); }
+    if (file) { 
+      const reader = new FileReader(); 
+      reader.readAsDataURL(file); 
+      reader.onloadend = () => setProofImage(reader.result); 
+    }
   };
 
   const handleClaimSubmit = async (e) => {
-    e.preventDefault(); if (!proofImage) return alert('Upload a screenshot first.');
+    e.preventDefault(); 
+    if (!proofImage) return alert('Upload a screenshot first.');
     const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/claims/submit', { proofImage }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post(`${API_URL}/api/claims/submit`, 
+        { proofImage }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       alert('Claim submitted! Awaiting review.'); setProofImage(null);
     } catch (error) { alert('Error submitting claim.'); }
   };

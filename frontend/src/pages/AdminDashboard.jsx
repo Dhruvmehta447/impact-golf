@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
+// Use production URL if available, otherwise fallback to local dev server
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [claims, setClaims] = useState([]);
@@ -19,19 +22,19 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
       try {
-        const userRes = await axios.get('http://localhost:5000/api/admin/users', { headers: { Authorization: `Bearer ${token}` }});
+        const userRes = await axios.get(`${API_URL}/api/admin/users`, { headers: { Authorization: `Bearer ${token}` }});
         setUsers(userRes.data);
         
-        const claimRes = await axios.get('http://localhost:5000/api/claims/all', { headers: { Authorization: `Bearer ${token}` }});
+        const claimRes = await axios.get(`${API_URL}/api/claims/all`, { headers: { Authorization: `Bearer ${token}` }});
         setClaims(claimRes.data);
 
-        const drawRes = await axios.get('http://localhost:5000/api/draws/history', { headers: { Authorization: `Bearer ${token}` }});
+        const drawRes = await axios.get(`${API_URL}/api/draws/history`, { headers: { Authorization: `Bearer ${token}` }});
         setDraws(drawRes.data);
 
-        const charityRes = await axios.get('http://localhost:5000/api/charities');
+        const charityRes = await axios.get(`${API_URL}/api/charities`);
         setCharities(charityRes.data);
 
-        const statsRes = await axios.get('http://localhost:5000/api/admin/stats', { headers: { Authorization: `Bearer ${token}` }});
+        const statsRes = await axios.get(`${API_URL}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` }});
         setStats(statsRes.data);
 
       } catch (err) { setError('Access denied. Admin privileges required.'); }
@@ -42,11 +45,11 @@ export default function AdminDashboard() {
   const updateClaim = async (claimId, newStatus, newPaymentStatus) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.put(`http://localhost:5000/api/claims/${claimId}/update`, 
+      await axios.put(`${API_URL}/api/claims/${claimId}/update`, 
         { status: newStatus, paymentStatus: newPaymentStatus }, 
         { headers: { Authorization: `Bearer ${token}` }}
       );
-      const claimRes = await axios.get('http://localhost:5000/api/claims/all', { headers: { Authorization: `Bearer ${token}` }});
+      const claimRes = await axios.get(`${API_URL}/api/claims/all`, { headers: { Authorization: `Bearer ${token}` }});
       setClaims(claimRes.data);
     } catch (err) { alert('Error updating claim.'); }
   };
@@ -55,7 +58,7 @@ export default function AdminDashboard() {
     if(!window.confirm("Are you sure? This will generate official winning numbers and update the global prize pool.")) return;
     const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/draws/run', {}, { headers: { Authorization: `Bearer ${token}` }});
+      await axios.post(`${API_URL}/api/draws/run`, {}, { headers: { Authorization: `Bearer ${token}` }});
       alert('Draw executed successfully!');
       window.location.reload(); 
     } catch (err) { alert('Error executing draw.'); }
@@ -66,9 +69,9 @@ export default function AdminDashboard() {
     if (!newCharityName) return;
     const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/charities/add', { name: newCharityName }, { headers: { Authorization: `Bearer ${token}` }});
+      await axios.post(`${API_URL}/api/charities/add`, { name: newCharityName }, { headers: { Authorization: `Bearer ${token}` }});
       setNewCharityName('');
-      const charityRes = await axios.get('http://localhost:5000/api/charities');
+      const charityRes = await axios.get(`${API_URL}/api/charities`);
       setCharities(charityRes.data);
     } catch (err) { alert('Error adding charity.'); }
   };
@@ -77,7 +80,7 @@ export default function AdminDashboard() {
     if(!window.confirm("Remove this charity from the platform?")) return;
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5000/api/charities/${id}`, { headers: { Authorization: `Bearer ${token}` }});
+      await axios.delete(`${API_URL}/api/charities/${id}`, { headers: { Authorization: `Bearer ${token}` }});
       setCharities(charities.filter(c => c._id !== id));
     } catch (err) { alert('Error deleting charity.'); }
   };

@@ -12,8 +12,9 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/register', { name, email, password });
-      localStorage.setItem('token', data.token);
+// Vite uses import.meta.env to grab the variables you set in Vercel
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const { data } = await axios.post(`${API_URL}/api/auth/register`, { name, email, password });      localStorage.setItem('token', data.token);
       navigate('/dashboard');
     } catch (error) {
       alert(error.response?.data?.message || 'Registration failed');

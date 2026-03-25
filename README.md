@@ -3,7 +3,7 @@
 
 **ImpactGolf** is a premium, full-stack MERN (MongoDB, Express, React, Node.js) SaaS platform designed for the modern golfer. It combines performance tracking with charitable giving and a high-stakes monthly prize pool. Users enter their golf scores to participate in global draws, while a percentage of every subscription and win is routed to world-changing charities.
 
-🚀 **Live Demo:** [https://impact-golf-git-main-dhruv-mehtas-projects-6107db05.vercel.app/]
+**Live Demo:** [https://impact-golf-git-main-dhruv-mehtas-projects-6107db05.vercel.app/]
 
 ---
 
